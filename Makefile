@@ -4,7 +4,8 @@ all: up
 
 up:
 	@test -n "$(VOLUMES_ROOT)" || (echo "VOLUMES_ROOT não está definido em src/.env"; exit 1)
-	@mkdir -p "$(VOLUMES_ROOT)/postgres"
+	@mkdir -p "$(VOLUMES_ROOT)/postgres" "$(VOLUMES_ROOT)/static" \
+	          "$(VOLUMES_ROOT)/media" "$(VOLUMES_ROOT)/certificates"
 	@docker compose --env-file src/.env -f src/docker-compose.yml up -d --build
 
 down:

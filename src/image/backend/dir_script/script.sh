@@ -1,11 +1,22 @@
 #!/bin/sh
 set -e
 
-[ -n "$DJANGO_SECRET_KEY_FILE" ] && export DJANGO_SECRET_KEY="$(cat "$DJANGO_SECRET_KEY_FILE")"
 [ -n "$POSTGRES_PASSWORD_FILE" ] && export POSTGRES_PASSWORD="$(cat "$POSTGRES_PASSWORD_FILE")"
 
 echo ">> A aplicar migrações..."
 python manage.py migrate --noinput
+
+
+if [ "$(id -u)" = "0" ]; then
+    mkdir -p /app/staticfiles /app/media
+    chown -R appuser:appuser /app/staticfiles /app/media
+    exec gosu appuser "$0" "$@"
+fi
+
+echo ">> A aguardar o Postgres..."
+until python -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('${POSTGRES_HOST:-postgres}', 5432))" 2>/dev/null; do
+    sleep 2
+done
 
 echo ">> A recolher ficheiros estáticos..."
 python manage.py collectstatic --noinput || true

@@ -1,6 +1,28 @@
 name: geoguess-angola
 
 services:
+
+  nginx:
+    build: ./image/nginx
+    restart: always
+    depends_on:
+      - backend
+      - frontend
+      - adminer
+
+    ports:
+      - "${NGINX_PORT}:443"
+    networks:
+      - geoguess
+
+    env_file:
+      - .env
+  
+    volumes:
+      - backend_static:/app/backend/staticfiles
+      - backend_media:/app/backend/media
+      - certificates:/etc/nginx/ssl
+
   postgres:
     build: ./image/postgres
     restart: always
@@ -14,27 +36,88 @@ services:
     env_file:
       - .env
 
+  backend:
+    build: ./image/backend
+    restart: always
+    
+    depends_on:
+      - postgres
+      - redis
 
+    env_file:
+    - .env
+    secrets:
+      - postgres_password
 
+    volumes:
+      - backend_static:/app/staticfiles
+      - backend_media:/app/media
 
+    networks:
+      - geoguess
 
+  redis:
+    build: ./image/redis
+    restart: always
+    depends_on:
+      - postgres
+    
+    networks:
+      - geoguess
 
+  frontend:
+    build: ./image/frontend
+    restart: always
+    env_file:
+      - .env
 
+    depends_on:
+      - backend
 
+    networks:
+      - geoguess
 
+  adminer:
+    build: ./image/adminer
+    restart: always
+    depends_on:
+      - postgres
 
-
-
-
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+ 
+    networks:
+      - geoguess
 
 
 volumes:
   postgres:
-    name: postgres
+    name: ${VOLUMES_POSTGRES}
     driver_opts:
       type: "none"
       o: bind
       device: ${VOLUMES_ROOT}/postgres
+
+  backend_static:
+    name: ${VOLUMES_STATIC}
+    driver_opts:
+      type: "none"
+      o: bind
+      device: ${VOLUMES_ROOT}/static
+
+  backend_media:
+    name: ${VOLUMES_MEDIA}
+    driver_opts:
+      type: "none"
+      o: bind
+      device: ${VOLUMES_ROOT}/media
+
+  certificates:
+    name: ${VOLUMES_CERTIFICATES}
+    driver_opts:
+      type: "none"
+      o: bind
+      device: ${VOLUMES_ROOT}/certificates
 
 secrets:
   postgres_password:

@@ -16,5 +16,6 @@ COPY dir_script/script.sh /usr/local/bin/script.sh
 RUN chmod +x /usr/local/bin/script.sh
 
 USER adminer
+
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/bin/script.sh"]

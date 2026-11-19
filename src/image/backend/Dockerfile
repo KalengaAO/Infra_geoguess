@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       git ca-certificates python3 python3-pip python3-venv python3-dev gcc libpq-dev \
- && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /app && rm -rf /var/lib/apt/lists/* \
  && python3 -m venv /opt/venv
 
 WORKDIR /app
@@ -22,7 +22,7 @@ RUN git clone --depth 1 --branch ${GIT_BRANCH} --filter=blob:none --sparse ${GIT
  && rm -rf /tmp/repo
 
 RUN pip install --no-cache-dir -r requirements.txt \
- && pip install --no-cache-dir gunicorn psycopg2-binary redis
+ && pip install --no-cache-dir gunicorn
 
 COPY dir_script/script.sh /usr/local/bin/script.sh
 RUN chmod +x /usr/local/bin/script.sh \
