@@ -1,41 +1,22 @@
-
+ARG POSTGRES_VERSION=15
 FROM debian:bookworm
 
-LABEL maintainer="GeoGuess Angola"
-LABEL description="PostgreSQL 15.19 custom image for GeoGuess Angola"
+ARG POSTGRES_VERSION
+ENV PG_VERSION=${POSTGRES_VERSION} \
+    PGDATA=/var/lib/postgresql/data \
+    PATH=/usr/lib/postgresql/${POSTGRES_VERSION}/bin:$PATH
 
-ENV PG_MAJOR=15
-ENV PGDATA=/var/lib/postgresql/data
-ENV PG_CONFIG_FILE=/etc/postgresql/postgresql.conf
-ENV PATH="/usr/lib/postgresql/15/bin:${PATH}"
+# Não criar o cluster "main" por omissão
+RUN mkdir -p /etc/postgresql-common \
+ && echo 'create_main_cluster = false' > /etc/postgresql-common/createcluster.conf \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends postgresql-${POSTGRES_VERSION} gosu \
+ && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependências necessárias
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        gosu \
-        postgresql-common \
-    && sed -i 's/^#\?create_main_cluster.*/create_main_cluster = false/' \
-        /etc/postgresql-common/createcluster.conf \
-    && apt-get install -y --no-install-recommends \
-        postgresql-15=15.19-0+deb12u1 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Criar o directório de dados
-RUN mkdir -p "${PGDATA}" \
-    && chown -R postgres:postgres /var/lib/postgresql
-
-# Copiar os ficheiros de configuração e inicialização
-COPY dir_config/postgresql.conf ${PG_CONFIG_FILE}
+COPY dir_config/postgresql.conf /etc/postgresql/postgresql.conf
 COPY dir_script/script.sh /usr/local/bin/script.sh
+RUN chown postgres:postgres /etc/postgresql/postgresql.conf \
+ && chmod +x /usr/local/bin/script.sh
 
-RUN chmod +x /usr/local/bin/script.sh
-
-# PostgreSQL escuta na porta interna 5432
 EXPOSE 5432
-
-STOPSIGNAL SIGINT
-
 ENTRYPOINT ["/usr/local/bin/script.sh"]
-
-CMD ["postgres"]

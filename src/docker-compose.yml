@@ -1,0 +1,45 @@
+name: geoguess-angola
+
+services:
+  postgres:
+    build: ./image/postgres
+    restart: always
+
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
+    networks:
+      - geoguess
+    env_file:
+      - .env
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+volumes:
+  postgres:
+    name: postgres
+    driver_opts:
+      type: "none"
+      o: bind
+      device: ${VOLUMES_ROOT}/postgres
+
+secrets:
+  postgres_password:
+    file: ../secrets/postgres_password.txt
+
+networks:
+  geoguess:
+    driver: bridge
