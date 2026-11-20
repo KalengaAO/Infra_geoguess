@@ -1,6 +1,6 @@
 # Secrets
 secrets/*
-
+secrets
 # Environment
 .env
 
