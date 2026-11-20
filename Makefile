@@ -11,13 +11,17 @@ up:
 down:
 	@docker compose --env-file src/.env -f src/docker-compose.yml down --remove-orphans
 
+build: 
+	@docker compose --env-file src/.env -f src/docker-compose.yml build
+
+
 stop:
 	@docker compose --env-file src/.env -f src/docker-compose.yml stop
 
 logs:
 	@docker compose --env-file src/.env -f src/docker-compose.yml logs
 
-re: down up
+re: fclean all
 
 clean:
 	@docker compose --env-file src/.env -f src/docker-compose.yml down -v --rmi all --remove-orphans
