@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-    git ca-certificates python3 python3-pip python3-venv python3-dev gcc libpq-dev \
+    git ca-certificates python3 python3-pip python3-venv python3-dev gcc libpq-dev gosu \
  && mkdir -p /app && rm -rf /var/lib/apt/lists/* \
  && python3 -m venv /opt/venv
 
@@ -28,6 +28,5 @@ COPY dir_script/script.sh /usr/local/bin/script.sh
 RUN chmod +x /usr/local/bin/script.sh \
  && useradd -m appuser && chown -R appuser:appuser /app
 
-USER appuser
 EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/script.sh"]
