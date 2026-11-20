@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      git ca-certificates python3 python3-pip python3-venv python3-dev gcc libpq-dev \
+    git ca-certificates python3 python3-pip python3-venv python3-dev gcc libpq-dev \
  && mkdir -p /app && rm -rf /var/lib/apt/lists/* \
  && python3 -m venv /opt/venv
 

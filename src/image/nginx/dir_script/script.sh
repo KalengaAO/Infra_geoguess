@@ -2,7 +2,7 @@
 set -e
 
 SSL_DIR=/etc/nginx/ssl
-DOMAIN="${DOMAIN_NAME:-localhost}"
+DOMAIN="${DOMAIN_NAME}"
 
 mkdir -p "$SSL_DIR"
 
