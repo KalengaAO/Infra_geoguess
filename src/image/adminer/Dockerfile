@@ -3,7 +3,7 @@ FROM debian:bookworm
 ARG ADMINER_VERSION=4.8.1
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends php-cli php-pgsql ca-certificates curl \
+ && apt-get install -y --no-install-recommends tini php-cli php-pgsql ca-certificates curl \
  && mkdir -p /var/www/html \
  && curl -fsSL -o /var/www/html/index.php \
       https://github.com/vrana/adminer/releases/download/v${ADMINER_VERSION}/adminer-${ADMINER_VERSION}.php \
