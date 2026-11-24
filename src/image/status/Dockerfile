@@ -5,6 +5,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY dir_config/status.py /opt/status/status.py
+COPY dir_config/status.html /opt/status/status.html
 COPY dir_script/script.sh /usr/local/bin/script.sh
 RUN chmod +x /usr/local/bin/script.sh
 
