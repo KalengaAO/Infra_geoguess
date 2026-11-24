@@ -1,5 +1,4 @@
-name: geoguess-angola
-
+name : geoguess
 services:
 
   nginx:
@@ -8,7 +7,6 @@ services:
     depends_on:
       - backend
       - frontend
-      - adminer
 
     ports:
       - "${NGINX_PORT}:443"
@@ -17,16 +15,16 @@ services:
 
     env_file:
       - .env
-  
     volumes:
       - backend_static:/app/backend/staticfiles
       - backend_media:/app/backend/media
       - certificates:/etc/nginx/ssl
 
   postgres:
-    build: ./image/postgres
-    restart: always
-
+    build: 
+      context: ./image/postgres
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION}
     volumes:
       - postgres:/var/lib/postgresql/data
     secrets:
@@ -35,6 +33,11 @@ services:
       - geoguess
     env_file:
       - .env
+    restart: always
+    healthcheck:
+      # -h 127.0.0.1 força TCP: só passa quando o servidor final está no ar
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      start_period: 40s
 
   backend:
     build: ./image/backend
@@ -42,7 +45,6 @@ services:
     
     depends_on:
       - postgres
-      - redis
 
     env_file:
     - .env
@@ -55,15 +57,17 @@ services:
 
     networks:
       - geoguess
+ 
 
   redis:
     build: ./image/redis
     restart: always
     depends_on:
-      - postgres
+      - backend
     
     networks:
       - geoguess
+
 
   frontend:
     build: ./image/frontend
@@ -77,6 +81,7 @@ services:
     networks:
       - geoguess
 
+
   adminer:
     build: ./image/adminer
     restart: always
@@ -89,6 +94,35 @@ services:
     networks:
       - geoguess
 
+  backup:
+    build:
+      context: ./image/backup
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION}
+    restart: always
+    depends_on:
+      - postgres
+    env_file: [.env]
+    secrets: [postgres_password]
+    volumes:
+      - backups:/backups
+      - backend_media:/app/media
+    networks: [geoguess]
+    healthcheck:
+      interval: 5m
+      timeout: 10s
+      retries: 1
+      start_period: 3m
+      # saudável se houve backup com sucesso nas últimas 2 janelas
+      test: ["CMD-SHELL", "test -n \"$$(find /backups/last_backup.ok -mmin -$$((($${BACKUP_INTERVAL_HOURS:-24}) * 120)) 2>/dev/null)\""]
+
+  status:
+    build: ./image/status
+    restart: always
+    env_file: [.env]
+    volumes:
+      - backups:/backups
+    networks: [geoguess]
 
 volumes:
   postgres:
@@ -118,6 +152,13 @@ volumes:
       type: "none"
       o: bind
       device: ${VOLUMES_ROOT}/certificates
+
+  backups:
+    name: backups
+    driver_opts: 
+      type: "none"
+      o: bind
+      device: "${VOLUMES_BACKUPS}"
 
 secrets:
   postgres_password:

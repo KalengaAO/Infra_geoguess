@@ -5,7 +5,7 @@ ARG GIT_BRANCH=main
 ARG NODE_MAJOR=22
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends git curl ca-certificates gnupg \
+ && apt-get install -y --no-install-recommends git curl tini ca-certificates gnupg \
  && curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
  && apt-get install -y --no-install-recommends nodejs \
  && rm -rf /var/lib/apt/lists/*
