@@ -81,7 +81,6 @@ services:
     networks:
       - geoguess
 
-
   adminer:
     build: ./image/adminer
     restart: always

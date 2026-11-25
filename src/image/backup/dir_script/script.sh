@@ -22,6 +22,7 @@ do_backup() {
     ts="$(date +%Y%m%d_%H%M%S)"
     db="$BACKUP_DIR/db_${ts}.dump"
     media="$BACKUP_DIR/media_${ts}.tar.gz"
+    
     echo ">> Backup $ts..."
     if pg_dump -Fc -f "$db.tmp" \
        && pg_restore --list "$db.tmp" > /dev/null \
