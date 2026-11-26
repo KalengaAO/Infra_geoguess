@@ -35,7 +35,6 @@ services:
       - .env
     restart: always
     healthcheck:
-      # -h 127.0.0.1 força TCP: só passa quando o servidor final está no ar
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       start_period: 40s
 
@@ -112,7 +111,6 @@ services:
       timeout: 10s
       retries: 1
       start_period: 3m
-      # saudável se houve backup com sucesso nas últimas 2 janelas
       test: ["CMD-SHELL", "test -n \"$$(find /backups/last_backup.ok -mmin -$$((($${BACKUP_INTERVAL_HOURS:-24}) * 120)) 2>/dev/null)\""]
 
   status:
